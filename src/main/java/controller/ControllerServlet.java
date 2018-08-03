@@ -10,7 +10,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 
@@ -25,17 +24,37 @@ public class ControllerServlet extends HttpServlet {
             action = "";
         }
         switch (action) {
+            case "create":
+                createNewProduct(request, response);
+                break;
             case "find":
                 findByNameProduct(request, response);
                 break;
             case "delete":
                 deleteProductInformation(request, response);
                 break;
-//            case "display":
-//                totalMoney(request, response);
-//                break;
             default:
                 break;
+        }
+    }
+
+    private void createNewProduct(HttpServletRequest request, HttpServletResponse response) {
+        String name = request.getParameter("name");
+        double price = Double.parseDouble(request.getParameter("price"));
+        String brand = request.getParameter("brand");
+
+        int id = this.productService.findAll().size() + 1;
+        Product product = new Product(id, name, price, brand);
+        this.productService.save(product);
+
+        request.setAttribute("message", "New product was created");
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/product/create.jsp");
+        try {
+            dispatcher.forward(request, response);
+        } catch (ServletException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -89,6 +108,9 @@ public class ControllerServlet extends HttpServlet {
             action = "";
         }
         switch (action) {
+            case "create":
+                showCreateForm(request, response);
+                break;
             case "find":
                 showFindByNameForm(request, response);
                 break;
@@ -104,9 +126,37 @@ public class ControllerServlet extends HttpServlet {
             case "display":
                 listProductInBasket(request, response);
                 break;
+            case "by":
+                byProduct(request, response);
+                break;
             default:
                 showListProduct(request, response);
                 break;
+        }
+    }
+
+    private void showCreateForm(HttpServletRequest request, HttpServletResponse response) {
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/product/create.jsp");
+        try {
+            dispatcher.forward(request, response);
+        } catch (ServletException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void byProduct(HttpServletRequest request, HttpServletResponse response) {
+        List<Product> products = this.productService.findBasket();
+        products.clear();
+        request.setAttribute("products", products);
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/basket/display.jsp");
+        try {
+            dispatcher.forward(request, response);
+        } catch (ServletException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -145,12 +195,11 @@ public class ControllerServlet extends HttpServlet {
     }
 
     private void saveProductIntoBasket(HttpServletRequest request, HttpServletResponse response) {
-//        HttpSession session = request.getSession();
         int id = Integer.parseInt(request.getParameter("id"));
         Product product = this.productService.findById(id);
 
         RequestDispatcher dispatcher;
-        this.productService.save(product);
+        this.productService.savetoBasket(product);
 
         List<Product> products = this.productService.findBasket();
         request.setAttribute("products", products);

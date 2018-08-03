@@ -38,6 +38,11 @@ public class ProductServiceiplm implements ProductService {
 
     @Override
     public void save(Product product) {
+        listProducts.put(product.getId(), product);
+    }
+
+    @Override
+    public void savetoBasket(Product product) {
         productBaskets.put(product.getId(), product);
     }
 
