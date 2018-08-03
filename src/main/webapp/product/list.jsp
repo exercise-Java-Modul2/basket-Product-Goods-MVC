@@ -14,6 +14,9 @@
 <body>
 <h1>Product list</h1>
 <p>
+    <a href="/products?action=create">Create new product</a>
+</p>
+<p>
     <a href="/products?action=find">Search</a>
 </p>
 
